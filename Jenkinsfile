@@ -2,17 +2,17 @@ pipeline {
     agent any
 
     environment {
-        sonarLogin = '2bab7bf7d5af25e2c2ca2f178af2c3c55c64d5d8'
+        sonarLogin = '616ea6fd3656ca0d3328a3f0a5e722ce91770a16'
         harborUser = 'admin'
         harborPassword = 'Harbor12345'
-        harborHost = '192.168.11.12:8888'
-        harborRepo = 'repository'
+        harborHost = '218.62.32.69:50600'
+        harborRepo = 'test'
     }
 
     stages {
         stage('拉取Git代码'){
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '$tag']], extensions: [], userRemoteConfigs: [[url: 'http://49.233.115.171:8929/root/lsx.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '$tag']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/teloon999/hello-world.git']]])
             }
         }
         stage('Maven构建代码'){
@@ -22,13 +22,12 @@ pipeline {
         }
         stage('SonarQube检测代码'){
             steps {
-                sh '/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.sources=./ -Dsonar.projectname=${JOB_NAME} -Dsonar.projectKey=${JOB_NAME} -Dsonar.java.binaries=target/ -Dsonar.login=${sonarLogin}'
+                sh '/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.sources=./ -Dsonar.projectname=${JOB_NAME} -Dsonar.projectKey=${JOB_NAME} -Dsonar.java.binaries=./*/target/ -Dsonar.login=${sonarLogin}'
             }
         }
         stage('制作自定义镜像'){
             steps {
-                sh '''cd docker
-                mv ../target/*.jar ./
+                sh '''
                 docker build -t ${JOB_NAME}:$tag .
                 '''
             }
